@@ -1,4 +1,6 @@
 package game;
+import org.lwjgl.glfw.GLFW;
+
 import engine.io.*;
 
 public class ControlSystem implements Runnable{
@@ -15,6 +17,7 @@ public class ControlSystem implements Runnable{
             update();
             render();
         }
+        terminate();
     }
     private void init(){
         window=new Window(1200,1200,"Main Screen");
@@ -30,6 +33,10 @@ public class ControlSystem implements Runnable{
     }
     private void render(){
         window.swapBuffers();
+    }
+    private void terminate(){
+        Input.terminate();
+        GLFW.glfwTerminate();
     }
     public static void main(String[] args){
         new ControlSystem().start();

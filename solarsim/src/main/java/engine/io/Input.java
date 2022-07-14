@@ -6,12 +6,12 @@ import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
 public class Input {
-    private boolean[] keys=new boolean[GLFW.GLFW_KEY_LAST];
-    private boolean[] buttons=new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST];
-    private double[] mousePos={0,0};
-    private GLFWKeyCallback keyboard;
-    private GLFWCursorPosCallback mousePosition;
-    private GLFWMouseButtonCallback mouseButtons;
+    private static boolean[] keys=new boolean[GLFW.GLFW_KEY_LAST];
+    private static boolean[] buttons=new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST];
+    private static double[] mousePos={0,0};
+    private static GLFWKeyCallback keyboard;
+    private static GLFWCursorPosCallback mousePosition;
+    private static GLFWMouseButtonCallback mouseButtons;
     public Input(){
         keyboard=new GLFWKeyCallback() {
             public void invoke(long window,int key,int scancode,int action,int mods){
@@ -30,13 +30,18 @@ public class Input {
             }
         };
     }
-    public double[] getMousePos(){
+    public static double[] getMousePos(){
         return(mousePos);
     }
-    public boolean getKeyPressed(int id){
+    public static boolean getKeyPressed(int id){
         return(keys[id]);
     }
-    public boolean getButtonPressed(int id){
+    public static boolean getButtonPressed(int id){
         return(buttons[id]);
+    }
+    public static void terminate(){
+        keyboard.free();
+        mousePosition.free();
+        mouseButtons.free();
     }
 }
