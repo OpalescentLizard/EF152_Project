@@ -12,12 +12,11 @@ public class Stars{
         this.r=r;
         this.color=color;
     }
-    public float[][] getFilledArcVertexes(double startingAngleDeg, double endAngleDeg, int slices) {
-        double arc=endAngleDeg-startingAngleDeg;
-        float[][] vertexes=new float[slices][2];
-        for(int i=0;i<slices;i++){
-            double ang=(arc*i)/slices;
-            System.out.println(ang);
+    public float[][] getFilledArcVertexes(int sliceRate) {
+        double arc=360;
+        float[][] vertexes=new float[sliceRate][2];
+        for(int i=0;i<sliceRate;i++){
+            double ang=(arc*i)/sliceRate;
             vertexes[i][0]=(float)Math.cos(Math.toRadians(ang))*r+x;
             vertexes[i][1]=(float)Math.sin(Math.toRadians(ang))*r+y;
         }

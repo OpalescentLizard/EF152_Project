@@ -96,6 +96,7 @@ public class Window {
     }
     //Swaps the game to fullscreen, keeping aspect ratio.
     public void changeFullscreen(){
+        System.out.println(width+""+height);
         isFullscreen=!isFullscreen;
         if(isFullscreen){
             GLFW.glfwGetWindowPos(window,normPos[0],normPos[1]);
@@ -103,6 +104,7 @@ public class Window {
         }else{
             GLFW.glfwSetWindowMonitor(window,0,normPos[0][0],normPos[1][0],width,height,0);
         }
+        System.out.println(width+""+height);
     }
     //Draws any shape given the input vertex list and a color.
     //position is based on three things: 0 being the center of the screen, 1 being the right or top edge of the screen, and -1 being the left or bottom edge.
