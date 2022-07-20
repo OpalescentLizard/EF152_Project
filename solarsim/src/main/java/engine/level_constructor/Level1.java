@@ -50,7 +50,12 @@ public class Level1{
     private void update(){
         window.update();
         Physics.step(inPlayPlanets);
+        drawStarField();
         drawPlanets();
+    }
+    //Draws stars onto the background, for fun. Currently doesn't actually do anything
+    private void drawStarField(){
+
     }
     //Will force the window to render the new updates.
     private void render(){
