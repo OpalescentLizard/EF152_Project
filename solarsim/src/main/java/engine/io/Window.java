@@ -1,5 +1,8 @@
 package engine.io;
 
+import java.nio.ByteBuffer;
+
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
@@ -91,6 +94,7 @@ public class Window {
         GLFW.glfwDestroyWindow(window);
         GLFW.glfwTerminate();
     }
+    //Swaps the game to fullscreen, keeping aspect ratio.
     public void changeFullscreen(){
         isFullscreen=!isFullscreen;
         if(isFullscreen){
@@ -100,12 +104,39 @@ public class Window {
             GLFW.glfwSetWindowMonitor(window,0,normPos[0][0],normPos[1][0],width,height,0);
         }
     }
+    //Draws any shape given the input vertex list and a color.
+    //position is based on three things: 0 being the center of the screen, 1 being the right or top edge of the screen, and -1 being the left or bottom edge.
+    //Eveything else is somewhere inbetween that.
     public void draw(float[] color,float[][] vertexes){
         GL11.glColor3fv(color);
-        GL11.glBegin(vertexes.length);
+        GL11.glBegin(6);
         for(int i=0;i<vertexes.length;i++){
-            GL11.glVertex2f(vertexes[0][0],vertexes[0][1]);
+            GL11.glVertex2f(vertexes[i][0],vertexes[i][1]);
         }
+        GL11.glVertex2f(vertexes[0][0],vertexes[0][1]);
         GL11.glEnd();
     }
+    public int getHeight(){
+        return(height);
+    }
+    public int getWidth(){
+        return(width);
+    }
+    //Suppoosed to draw text, can't get it working though
+    /*public void writeText(String text,float x,float y){
+        int s = 256; //Take whatever size suits you.
+        BufferedImage b = new BufferedImage(s, s, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D g = b.createGraphics();
+        g.drawString(text, 0, 0);
+
+        int co = b.getColorModel().getNumComponents();
+
+        byte[] data = new byte[co * s * s];
+        b.getRaster().getDataElements(0, 0, s, s, data);
+
+        ByteBuffer pixels = BufferUtils.createByteBuffer(data.length);
+        pixels.put(data);
+        pixels.rewind();
+        GL11.glTexImage2D(window,pixels);
+    }*/
 }

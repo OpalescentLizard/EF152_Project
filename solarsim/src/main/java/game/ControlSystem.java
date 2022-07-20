@@ -23,7 +23,7 @@ public class ControlSystem implements Runnable{
     public void run(){
         init();
         Level1 level1=new Level1(window);
-        level1.start();
+        boolean shouldContinue=level1.start();
         window.terminate();
     }
     //Creates the window class and sets all variables to what's needed. The window class will be the main hub for all functions for the game.

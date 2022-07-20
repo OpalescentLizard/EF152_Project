@@ -3,20 +3,24 @@ import org.lwjgl.glfw.GLFW;
 import engine.io.*;
 import engine.objects.Planets;
 import java.util.ArrayList;
+import engine.Physics.*;
 public class Level1{
     public Window window;
     public ArrayList<Planets> inPlayPlanets=new ArrayList<Planets>();;
-    public int slices=10;
+    public int slices=12;
     public Level1(Window window){
         this.window=window;
     }
-    public void start(){
-        while(!window.shouldClose()){
+    //Starts the level and loops it untill some condition is met or the game is closed.
+    public boolean start(){
+        createPlanets();
+        while(true){
+            if(window.shouldClose()){
+                return(false);
+            }
             if(Input.getKeyPressed(GLFW.GLFW_KEY_F11)){
                 window.changeFullscreen();
             }
-            createPlanets();
-            drawPlanets();
             update();
             render();
         }
@@ -30,11 +34,23 @@ public class Level1{
     }
     //A method to create each of the planets we need.
     public void createPlanets(){
+        //A template for making a planet. I would replace everything in here, don't keep the template itself
+        float[] samplePlanetColor={1.0f,1.0f,1.0f}/*Fractions of an rgb value, with 1 being 255*/;
+        int[] samplePlanetEffectedBy={}/*list of planets that effect this one gravitationaly.*/;
+        double samplePlanetMass=10/*in Kg*/;
+        double samplePlanetVelocity=0/*in m/s*/;
+        float[] samplePlanetPosition={0,0}/*The postion of the planet, with 0 being the center of the scree, 1 being the right and top edge respectivly, and -1 being the left and bottom edge respectivly. All mesurments are between 1 and 0. To get true value, just multiply by the field size constant in the constants list*/;
+        float samplePlanetDisplaySize=0.1f/*As a fraction of the screen's size*/;
+        int samplePlanetIndex=0/*This has to be the same index as the planet's index in inPlayPlanets*/;
+        Planets samplePlanet=new Planets(samplePlanetPosition[0],samplePlanetPosition[1],samplePlanetDisplaySize,samplePlanetIndex,samplePlanetEffectedBy,samplePlanetColor,samplePlanetMass,samplePlanetVelocity);
+        inPlayPlanets.add(samplePlanet);
 
     }
     //Will call all systems that need to be updated, mainly physics and the game window.
     private void update(){
         window.update();
+        Physics.step(inPlayPlanets);
+        drawPlanets();
     }
     //Will force the window to render the new updates.
     private void render(){
