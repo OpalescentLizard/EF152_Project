@@ -6,10 +6,8 @@ import engine.physics.*;
 import engine.animations.*;
 import game.Constants;
 
-import java.security.PermissionCollection;
 import java.util.*;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 public class Level1{
     public Window window;
@@ -19,6 +17,9 @@ public class Level1{
     public boolean quedToPlacePlanet=false;
     public boolean quedToReleaseLeftClick=false;
     public boolean quedToReleaseSpace=false;
+    public boolean quedToSetVelocity=false;
+    public double tempPlanetMass=Constants.lowestPlanetMass;
+    public double[] tempPlanetPos={0,0};
     public Level1(Window window){
         this.window=window;
     }
@@ -33,6 +34,9 @@ public class Level1{
             if(Input.getKeyPressed(GLFW.GLFW_KEY_F11)){
                 window.changeFullscreen();
             }
+            if(!checkForPlanets()){
+                return(true);
+            }
             update();
             render();
         }
@@ -41,7 +45,7 @@ public class Level1{
     private void drawPlanets(){
         for (String key:inPlayBodies.keySet()) {
             Planets planet=inPlayBodies.get(key);
-            window.draw(planet.getColor(),planet.getFilledArcVertexes(Constants.planetSliceRate));
+            window.draw(planet.getColor(),planet.getFilledArcVertexes(Constants.planetSliceRate),6);
         }
     }
     //A method to create each of the planets we need.
@@ -49,23 +53,25 @@ public class Level1{
         //A template for making a planet. I would replace everything in here, don't keep the template itself
         float[] sampleSunColor=Constants.sunColor/*Fractions of an rgb value, with 1 being 255*/;
         ArrayList<String> sampleSunEffectedBy=new ArrayList<String>()/*list of planets that effect this one gravitationaly.*/;
-        double sampleSunMass=1.989*Math.pow(10,30)/*in Kg*/;
+        double sampleSunMass=Constants.sunMass/*in Kg*/;
         double[] sampleSunVelocity={0,0}/*in m/s*/;
         double[] sampleSunPosition={0,0}/*The postion of the planet, with 0 being the center of the scree, 1 being the right and top edge respectivly, and -1 being the left and bottom edge respectivly. All mesurments are between 1 and 0. To get true value, just multiply by the field size constant in the constants list*/;
         Planets sampleSun=new Planets(sampleSunPosition[0],sampleSunPosition[1],sampleSunEffectedBy,sampleSunColor,sampleSunMass,sampleSunVelocity);
         inPlayBodies.put("Sun_1"/*This is the key. Make sure it is planet for planets, sun for suns, and hazard for hazards.*/,sampleSun);
+
         float[] samplePlanetColor={0,0,1.0f}/*Fractions of an rgb value, with 1 being 255*/;
         ArrayList<String> samplePlanetEffectedBy=new ArrayList<String>()/*list of planets that effect this one gravitationaly.*/;
         samplePlanetEffectedBy.add("Sun_1");
-        double samplePlanetMass=2.972*Math.pow(10,24)/*in Kg*/;
+        double samplePlanetMass=Constants.lowestPlanetMass/*in Kg*/;
         double[] samplePlanetVelocity={0,29800}/*in m/s*/;
         double[] samplePlanetPosition={-0.2,0}/*The postion of the planet, with 0 being the center of the scree, 1 being the right and top edge respectivly, and -1 being the left and bottom edge respectivly. All mesurments are between 1 and 0. To get true value, just multiply by the field size constant in the constants list*/;
         Planets samplePlanet=new Planets(samplePlanetPosition[0],samplePlanetPosition[1],samplePlanetEffectedBy,samplePlanetColor,samplePlanetMass,samplePlanetVelocity);
         inPlayBodies.put("Planet_1"/*This is the key. Make sure it is planet for planets, sun for suns, and hazard for hazards.*/,samplePlanet);
+
         float[] samplePlanetColor2={0,1.0f,0}/*Fractions of an rgb value, with 1 being 255*/;
         ArrayList<String> samplePlanetEffectedBy2=new ArrayList<String>()/*list of planets that effect this one gravitationaly.*/;
         samplePlanetEffectedBy2.add("Sun_1");
-        double samplePlanetMass2=2.972*Math.pow(10,24)/*in Kg*/;
+        double samplePlanetMass2=Constants.lowestPlanetMass/*in Kg*/;
         double[] samplePlanetVelocity2={0,29800}/*in m/s*/;
         double[] samplePlanetPosition2={0.2,0}/*The postion of the planet, with 0 being the center of the scree, 1 being the right and top edge respectivly, and -1 being the left and bottom edge respectivly. All mesurments are between 1 and 0. To get true value, just multiply by the field size constant in the constants list*/;
         Planets samplePlanet2=new Planets(samplePlanetPosition2[0],samplePlanetPosition2[1],samplePlanetEffectedBy2,samplePlanetColor2,samplePlanetMass2,samplePlanetVelocity2);
@@ -82,7 +88,9 @@ public class Level1{
     private void update(){
         window.update();
         handleInputs();
-        Physics.step(inPlayBodies,collisionEffects);
+        if(!(Constants.pauseOnPlanetAdd&&(quedToSetVelocity||quedToPlacePlanet))){
+            Physics.step(inPlayBodies,collisionEffects);
+        }
         drawTempPlanet();
         drawStarField();
         drawPlanets();
@@ -94,8 +102,12 @@ public class Level1{
         }
         if(quedToReleaseLeftClick&&!Input.getButtonPressed(0)){
             if(quedToPlacePlanet){
-                createNewPlanet();
+                createNewPlanetPhase1();
                 quedToPlacePlanet=false;
+                quedToSetVelocity=true;
+            }else if(quedToSetVelocity){
+                createNewPlanetPhase2();
+                quedToSetVelocity=false;
             }
             quedToReleaseLeftClick=false;
         }
@@ -103,7 +115,8 @@ public class Level1{
             quedToReleaseSpace=true;
         }
         if(quedToReleaseSpace&&!Input.getKeyPressed(32)){
-            quedToPlacePlanet=true;
+            quedToPlacePlanet=!quedToPlacePlanet;
+            quedToSetVelocity=false;
             quedToReleaseSpace=false;
         }
     }
@@ -111,30 +124,99 @@ public class Level1{
     private void drawStarField(){
         for(int i=0;i<starField.size();i++){
             Stars star=starField.get(i);
-            window.draw(star.getColor(),star.getFilledArcVertexes(Constants.starSliceRate));
+            window.draw(star.getColor(),star.getFilledArcVertexes(Constants.starSliceRate),6);
         }
     }
     private void dawCollisions(){
         for (int i=0;i<collisionEffects.size();i++){
             CollisionEffect effect=collisionEffects.get(i);
             float[][][] vertexes=effect.getVertexes();
-            window.draw(Constants.collisionAnimationColor1,vertexes[0]);
-            window.draw(Constants.collisionAnimationColor2,vertexes[1]);
+            window.draw(Constants.collisionAnimationColor1,vertexes[0],6);
+            window.draw(Constants.collisionAnimationColor2,vertexes[1],6);
             if(effect.update()>2){
                 collisionEffects.remove(i);
             }
         }
     }
     private void drawTempPlanet(){
-        if(quedToPlacePlanet){
-            
+        if(quedToPlacePlanet||quedToSetVelocity){
+            double x=0;
+            double y=0;
+            if(!quedToSetVelocity){
+                double[] mousePos=Input.getMousePos();
+                x=(mousePos[0]/(window.getWidth()/2))-1;
+                y=(1-(mousePos[1]/(window.getHeight()/2)))-(1/2);
+            }else{
+                x=tempPlanetPos[0];
+                y=tempPlanetPos[1];
+            }
+            window.draw(Constants.tempPlanetColor,getTempPlanetVertexes(x,y),2);
+        }
+        if(quedToSetVelocity){
+            double[] mousePos=Input.getMousePos();
+            float startx=(float)tempPlanetPos[0];
+            float starty=(float)tempPlanetPos[1];
+            float endx=(float)(mousePos[0]/(window.getWidth()/2))-1;
+            float endy=(float)(1-(mousePos[1]/(window.getHeight()/2)))-(1/2);
+            double clip=(Planets.radiusFromMass(tempPlanetMass)/Math.sqrt(Math.pow(endx-startx,2)+Math.pow(endy-starty,2)));
+            startx=startx+(float)((endx-startx)*clip);
+            starty=starty+(float)((endy-starty)*clip);
+            float[][] pos={{startx,starty},{endx,endy}};
+            window.draw(Constants.tempPlanetColor,pos,2);
         }
     }
-    public void createNewPlanet(){
-        System.out.println("Output");
+    public void createNewPlanetPhase1(){
+        double[] mousePos=Input.getMousePos();
+        tempPlanetPos[0]=(mousePos[0]/(window.getWidth()/2))-1;
+        tempPlanetPos[1]=(1-(mousePos[1]/(window.getHeight()/2)))-(1/2);
+    }
+    public void createNewPlanetPhase2(){
+        double[] mousePos=Input.getMousePos();
+        float startx=(float)tempPlanetPos[0];
+        float starty=(float)tempPlanetPos[1];
+        float endx=(float)(mousePos[0]/(window.getWidth()/2))-1;
+        float endy=(float)(1-(mousePos[1]/(window.getHeight()/2)))-(1/2);
+        double mag=Math.sqrt(Math.pow(endx-startx,2)+Math.pow(endy-starty,2));
+        double[] tempPlanetVelocity={((endx-startx)*Constants.velMagnitude),((endy-starty)*Constants.velMagnitude)};
+
+        float[] tempPlanetColor={(float)Math.random(),(float)Math.random(),(float)Math.random()}/*Fractions of an rgb value, with 1 being 255*/;
+        ArrayList<String> tempPlanetEffectedBy=new ArrayList<String>()/*list of planets that effect this one gravitationaly.*/;
+        tempPlanetEffectedBy.add("Sun_1");
+        Planets tempPlanet=new Planets(tempPlanetPos[0],tempPlanetPos[1],tempPlanetEffectedBy,tempPlanetColor,tempPlanetMass,tempPlanetVelocity);
+        int id=1;
+        while(inPlayBodies.containsKey("Planet_"+id)){
+            id++;
+        }
+        inPlayBodies.put("Planet_"+id/*This is the key. Make sure it is planet for planets, sun for suns, and hazard for hazards.*/,tempPlanet);
+        tempPlanetMass=Constants.lowestPlanetMass;
+        tempPlanetPos[0]=0;
+        tempPlanetPos[1]=0;
+        System.out.println(tempPlanetVelocity[0]+" "+tempPlanetVelocity[1]);
+
     }
     //Will force the window to render the new updates.
     private void render(){
         window.swapBuffers();
+    }
+    private float[][] getTempPlanetVertexes(double x,double y){
+        double r=Planets.radiusFromMass(tempPlanetMass);
+        int sliceRate=Constants.planetSliceRate;
+        double arc=360;
+        float[][] vertexes=new float[sliceRate][2];
+        for(int i=0;i<sliceRate;i++){
+            double ang=(arc*i)/sliceRate;
+            vertexes[i][0]=(float)(Math.cos(Math.toRadians(ang))*r+x);
+            vertexes[i][1]=(float)(Math.sin(Math.toRadians(ang))*r+y);
+        }
+        return vertexes;
+    }
+    private boolean checkForPlanets(){
+        int numPlanets=0;
+        for (String key:inPlayBodies.keySet()){
+            if(key.split("_")[0].equals("Planet")){
+                numPlanets++;
+            }
+        }
+        return(numPlanets>0);
     }
 }

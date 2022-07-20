@@ -4,7 +4,6 @@ import engine.objects.Planets;
 import game.Constants;
 import engine.animations.CollisionEffect;
 
-import java.lang.reflect.Array;
 import java.util.*;
 public class Physics {
     public static void step(Map<String,Planets> inPlayBodies,ArrayList<CollisionEffect> collisionEffects){

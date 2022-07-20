@@ -1,8 +1,5 @@
 package engine.io;
 
-import java.nio.ByteBuffer;
-
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
@@ -42,6 +39,7 @@ public class Window {
         GLFW.glfwSetWindowPos(window,normPos[0][0],normPos[1][0]); //Centers the window
         GLFW.glfwShowWindow(window); //Displays the window so the viewer can see it
         GLFW.glfwMakeContextCurrent(window); //Makes sure that the window is currently being interacted with (IE, you arn't clicking on the window behind even though this is displayed ontop).
+        GLFW.glfwSetWindowTitle(window,"Solar Sim Game");//Titles the Window
         GL.createCapabilities(); //Allows us to render onto the window
 
         linkCallbacks();
@@ -109,9 +107,9 @@ public class Window {
     //Draws any shape given the input vertex list and a color.
     //position is based on three things: 0 being the center of the screen, 1 being the right or top edge of the screen, and -1 being the left or bottom edge.
     //Eveything else is somewhere inbetween that.
-    public void draw(float[] color,float[][] vertexes){
+    public void draw(float[] color,float[][] vertexes,int mode){
         GL11.glColor3fv(color);
-        GL11.glBegin(6);
+        GL11.glBegin(mode);
         for(int i=0;i<vertexes.length;i++){
             GL11.glVertex2f(vertexes[i][0],vertexes[i][1]);
         }

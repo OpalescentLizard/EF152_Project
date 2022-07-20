@@ -19,4 +19,9 @@ public class Constants {
     public static double[] collisionAnimationSizes={0.03,0.02,0.035,0.015};
     public static int planetSliceRate=12;
     public static int starSliceRate=12;
+    public static double lowestPlanetMass=2.972*Math.pow(10,24);
+    public static double sunMass=1.989*Math.pow(10,30);
+    public static float[] tempPlanetColor={0.5f,0.5f,0.5f};
+    public static double velMagnitude=30000.0;
+    public static boolean pauseOnPlanetAdd=true;
 }

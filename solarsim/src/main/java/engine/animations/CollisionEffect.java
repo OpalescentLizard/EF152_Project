@@ -28,13 +28,16 @@ public class CollisionEffect {
         float[][][] vertexes=new float[2][sliceRate][2];
         for(int i=0;i<sliceRate;i++){
             double ang=(arc*i)/sliceRate;
-            vertexes[0][i][0]=(float)(Math.cos(Math.toRadians(ang))*size+x);
-            vertexes[0][i][1]=(float)(Math.sin(Math.toRadians(ang))*size+y);
+            double n=4;
+            double m=5;
+            double k=0.5;
+            double r=(Math.cos((2*Math.asin(k)+Math.PI*m)/(2*n)))/(Math.cos((2*Math.asin(k*Math.cos(n*ang))+Math.PI*m)/(2*n)));
+            vertexes[0][i][0]=(float)(Math.cos(Math.toRadians(ang))*r*size+x);
+            vertexes[0][i][1]=(float)(Math.sin(Math.toRadians(ang))*r*size+y);
         }
         for(int i=0;i<sliceRate;i++){
-            double ang=(arc*i)/sliceRate;
-            vertexes[1][i][0]=(float)(Math.cos(Math.toRadians(ang))*size*scale+x);
-            vertexes[1][i][1]=(float)(Math.sin(Math.toRadians(ang))*size*scale+y);
+            vertexes[1][i][0]=(float)((vertexes[0][i][0])*scale+(x-x*scale));
+            vertexes[1][i][1]=(float)((vertexes[0][i][1])*scale+(y-y*scale));
         }
         return(vertexes);
     }

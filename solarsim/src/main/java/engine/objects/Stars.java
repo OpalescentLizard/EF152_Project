@@ -1,5 +1,4 @@
 package engine.objects;
-import java.util.ArrayList;
 import java.lang.Math;
 public class Stars{
     public float[] color={0,0,0};

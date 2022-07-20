@@ -1,9 +1,6 @@
 package game;
 
-import org.lwjgl.glfw.GLFW;
-
 import engine.io.*;
-import game.Constants;
 import engine.level_constructor.*;;
 
 public class ControlSystem implements Runnable{
@@ -24,6 +21,13 @@ public class ControlSystem implements Runnable{
         init();
         Level1 level1=new Level1(window);
         boolean shouldContinue=level1.start();
+        if(shouldContinue){
+            Constants.backgroundColor[0]=1.0f;
+            while(!window.shouldClose()){
+                window.update();
+                window.swapBuffers();
+            }
+        }
         window.terminate();
     }
     //Creates the window class and sets all variables to what's needed. The window class will be the main hub for all functions for the game.
