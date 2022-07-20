@@ -1,18 +1,21 @@
 package engine.level_constructor;
 import org.lwjgl.glfw.GLFW;
 import engine.io.*;
-import engine.objects.Planets;
+import engine.objects.*;
 import java.util.ArrayList;
 import engine.Physics.*;
+import game.Constants;
 public class Level1{
     public Window window;
-    public ArrayList<Planets> inPlayPlanets=new ArrayList<Planets>();;
+    public ArrayList<Planets> inPlayPlanets=new ArrayList<Planets>();
+    public ArrayList<Stars> starField=new ArrayList<Stars>();
     public int slices=12;
     public Level1(Window window){
         this.window=window;
     }
     //Starts the level and loops it untill some condition is met or the game is closed.
     public boolean start(){
+        createStarField();
         createPlanets();
         while(true){
             if(window.shouldClose()){
@@ -46,6 +49,13 @@ public class Level1{
         inPlayPlanets.add(samplePlanet);
 
     }
+    public void createStarField(){
+        for(int i=0;i<Constants.numberStars;i++){
+            float[] starPosition={(float)Math.random()*((Math.random()>0.5)?1:-1),(float)Math.random()*((Math.random()>0.5)?1:-1)};
+            Stars sampleStar=new Stars(starPosition[0],starPosition[1],Constants.starSize,Constants.starColor);
+            starField.add(sampleStar);
+        }
+    }
     //Will call all systems that need to be updated, mainly physics and the game window.
     private void update(){
         window.update();
@@ -55,7 +65,10 @@ public class Level1{
     }
     //Draws stars onto the background, for fun. Currently doesn't actually do anything
     private void drawStarField(){
-
+        for(int i=0;i<starField.size();i++){
+            Stars star=starField.get(i);
+            window.draw(star.getColor(),star.getFilledArcVertexes(0,360,slices));
+        }
     }
     //Will force the window to render the new updates.
     private void render(){
