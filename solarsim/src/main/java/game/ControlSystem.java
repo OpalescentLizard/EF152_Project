@@ -1,45 +1,36 @@
 package game;
+
 import org.lwjgl.glfw.GLFW;
 
 import engine.io.*;
+import game.Constants;
+import engine.level_constructor.*;;
 
 public class ControlSystem implements Runnable{
     public Thread ioPipeline;
     public Window window;
-    public long time;
+    //Kicks of the program by initializing the start function. Perferably, this should go untouched.
+    public static void main(String[] args){
+        new ControlSystem().start();
+    }
+    //Actually starts the control system. This, however, manages the addition of a new thread and not the start of the game.
     public void start(){
         ioPipeline=new Thread(this,"display");
         ioPipeline.start();
     }
+    //Initializes and runs the game in two steps, update which checks all inputs and physics and makes sure everything is in sync,
+    //then render which updates what's actually displayed on screen. Once the screen is closed, it will terminate everything.
     public void run(){
         init();
-        while(!window.shouldClose()){
-            update();
-            render();
-        }
-        terminate();
+        Level1 level1=new Level1(window);
+        level1.start();
+        window.terminate();
     }
+    //Creates the window class and sets all variables to what's needed. The window class will be the main hub for all functions for the game.
     private void init(){
         window=new Window(1200,1200,"Main Screen");
         window.createWindow();
         window.startLoop(1);
-        time=System.currentTimeMillis();
+        window.setBackgroundColor(Constants.backgroundColor);
     }
-    private void update(){
-        window.update();
-        long curTime=System.currentTimeMillis();
-        System.out.println(1000/((double)(curTime-time)));
-        time=curTime;
-    }
-    private void render(){
-        window.swapBuffers();
-    }
-    private void terminate(){
-        Input.terminate();
-        GLFW.glfwTerminate();
-    }
-    public static void main(String[] args){
-        new ControlSystem().start();
-    }
-    
 }
